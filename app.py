@@ -1,4 +1,4 @@
-calendar
+import calendar
 from datetime import datetime
 import holidays  # 💡 대한민국 공휴일 라이브러리 추가
 import pandas as pd
