@@ -112,7 +112,7 @@ kr_holidays = holidays.KR(years=st.session_state.current_year)
 
 # 💡 3) [예외 처리] 공휴일이나 휴진일이지만 '강제로 정상 진료'를 해야 하는 날짜 목록 (YYYY-MM-DD)
 # 진료로 변경하고 싶은 날짜를 아래 형식으로 추가하시면 됩니다. (예시: 9월 특정 공휴일 진료)
-force_work_dates = ["2026-09-25"]
+force_work_dates = ["2026-10-05"]
 
 # 달력 시작을 일요일(SUNDAY)로 설정
 calendar.setfirstweekday(calendar.SUNDAY)
