@@ -110,9 +110,8 @@ if not holiday_df.empty and "Date" in holiday_df.columns:
 # 2) 대한민국 공휴일 자동 생성 (현재 조회 중인 연도 기준)
 kr_holidays = holidays.KR(years=st.session_state.current_year)
 
-# 💡 3) [예외 처리] 공휴일이나 휴진일이지만 '강제로 정상 진료'를 해야 하는 날짜 목록 (YYYY-MM-DD)
-# 진료로 변경하고 싶은 날짜를 아래 형식으로 추가하시면 됩니다. (예시: 9월 특정 공휴일 진료)
-force_work_dates = ["2026-10-05"]
+# 3) [예외 처리] 목요일이나 일요일이지만 '강제로 정상 진료'를 해야 하는 날짜가 있다면 여기에 추가 (YYYY-MM-DD)
+force_work_dates = [2026-10-05]
 
 # 달력 시작을 일요일(SUNDAY)로 설정
 calendar.setfirstweekday(calendar.SUNDAY)
@@ -158,21 +157,20 @@ for week in cal:
 
       is_sheet_holiday = current_date_str in holiday_dates
       is_kr_holiday = current_date in kr_holidays
-      is_force_work = (
-          current_date_str in force_work_dates
-      )  # 💡 강제 진료일 체크
+      is_force_work = current_date_str in force_work_dates  # 강제 진료일 체크
       is_sunday = i == 0  # 일요일
+      is_thursday = i == 4  # 💡 목요일 체크 추가
 
-      # 💡 상태 판별 순서 (강제 진료일 조건이 휴진 조건보다 최우선으로 적용됨)
+      # 💡 상태 판별 로직 (강제 진료일 ➔ 구글시트/공휴일 ➔ 일요일/목요일 정기휴일 순서)
       if is_force_work:
         cell_class = "work-bg"
         badge = '<span class="badge-work">진료일</span>'
       elif is_sheet_holiday or is_kr_holiday:
         cell_class = "holiday-bg"
         badge = '<span class="badge-off">휴진일</span>'
-      elif is_sunday:
+      elif is_sunday or is_thursday:  # 💡 일요일과 목요일 모두 정기 휴일로 지정
         cell_class = "weekend-bg"
-        badge = '<span class="badge-off">주말휴진</span>'
+        badge = '<span class="badge-off">정기휴진</span>'
       else:
         cell_class = "work-bg"
         badge = '<span class="badge-work">진료일</span>'
