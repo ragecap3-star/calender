@@ -66,7 +66,7 @@ with st.sidebar:
 
 
 # --- 3. 월간 달력 네비게이션 (전달 / 다음달 이동) ---
-st.title("📅 월간 진료일 안내")
+st.title("📅 E건강치과의원 월간 진료일 안내")
 
 if "current_year" not in st.session_state:
   st.session_state.current_year = datetime.now().year
