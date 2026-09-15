@@ -5,15 +5,15 @@ import streamlit as st
 
 # 페이지 설정
 st.set_page_config(
-    page_title="매장 영업일 & 공지사항", page_icon="📅", layout="centered"
+    page_title="병원 진료일 & 공지사항", page_icon="🏥", layout="centered"
 )
 
 # --- 1. 구글 스프레드시트 데이터 불러오기 (공개 CSV 링크 활용) ---
 @st.cache_data(ttl=60)  # 60초마다 캐시 갱신 (시트 수정사항 반영)
 def load_data():
-  # ⚠️ 아래 링크를 본인의 구글 시트 '웹에 게시된 CSV 링크'로 변경하세요!
-  notice_csv_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vReihb92LxghRUxSMJinTTUXuPgrEz4MHly0_8IL-T_t_RNsEM7UPgtMAp_UZ7qwXolr1M8V0F7qN_-/pub?gid=0&single=true&output=csv"
-  holiday_csv_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vReihb92LxghRUxSMJinTTUXuPgrEz4MHly0_8IL-T_t_RNsEM7UPgtMAp_UZ7qwXolr1M8V0F7qN_-/pub?gid=1822084661&single=true&output=csv"
+  # ⚠️ 아래 링크를 본인의 구글 시트 '웹에 게시된 CSV 링크'로 각각 변경하세요!
+  notice_csv_url = "YOUR_NOTICE_CSV_LINK"
+  holiday_csv_url = "YOUR_HOLIDAY_CSV_LINK"
 
   try:
     notice_df = pd.read_csv(notice_csv_url)
@@ -43,7 +43,7 @@ notice_content = notice_dict.get("content", "등록된 내용이 없습니다.")
 
 
 # --- 2. 팝업 공지사항 구현 ---
-@st.dialog("📢 오늘의 소식 & 공지사항")
+@st.dialog("📢 병원 소식 & 공지사항")
 def notice_popup():
   st.markdown(f"### **{notice_title}**")
   st.write(notice_content)
@@ -58,7 +58,7 @@ if "popup_shown" not in st.session_state:
 
 # 사이드바에도 공지 상시 노출
 with st.sidebar:
-  st.header("📢 매장 소식")
+  st.header("📢 병원 소식")
   st.subheader(notice_title)
   st.write(notice_content)
   st.divider()
@@ -66,7 +66,7 @@ with st.sidebar:
 
 
 # --- 3. 월간 달력 네비게이션 (전달 / 다음달 이동) ---
-st.title("📅 월간 영업일 안내")
+st.title("📅 월간 진료일 안내")
 
 if "current_year" not in st.session_state:
   st.session_state.current_year = datetime.now().year
@@ -101,8 +101,8 @@ with col3:
 
 st.write("")
 
-# --- 4. 달력 렌더링 및 영업일/휴일 판별 ---
-# 휴일 데이터 리스트화 (YYYY-MM-DD)
+# --- 4. 달력 렌더링 및 진료일/휴진일 판별 ---
+# 휴진일 데이터 리스트화 (YYYY-MM-DD)
 holiday_dates = []
 if not holiday_df.empty and "Date" in holiday_df.columns:
   holiday_dates = holiday_df["Date"].astype(str).tolist()
@@ -123,7 +123,7 @@ calendar_html = """
 .weekend-bg { background-color: #f8f9fa; }
 .work-bg { background-color: #ffffff; }
 .badge-off { background-color: #ff6b6b; color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; display: inline-block; font-weight: 500; }
-.badge-work { background-color: #51cf66; color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; display: inline-block; font-weight: 500; }
+.badge-work { background-color: #339af0; color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; display: inline-block; font-weight: 500; }
 </style>
 <table class="cal-table">
     <tr>
@@ -144,18 +144,18 @@ for week in cal:
       current_date_str = f"{st.session_state.current_year}-{st.session_state.current_month:02d}-{day:02d}"
 
       is_holiday = current_date_str in holiday_dates
-      is_weekend = i >= 5  # 토(5), 일(6)
+      is_weekend = i >= 5  # 토(5), 일(6) 주말 진료 여부에 따라 조정 가능
 
-      # 상태 판별 및 디자인 적용
+      # 상태 판별 및 디자인 적용 (진료일 / 휴진일)
       if is_holiday:
         cell_class = "holiday-bg"
-        badge = '<span class="badge-off">휴무일</span>'
+        badge = '<span class="badge-off">휴진일</span>'
       elif is_weekend:
         cell_class = "weekend-bg"
-        badge = '<span class="badge-off">주말휴무</span>'  # 주말 영업이면 badge-work로 변경 가능
+        badge = '<span class="badge-off">주말휴진</span>'
       else:
         cell_class = "work-bg"
-        badge = '<span class="badge-work">영업일</span>'
+        badge = '<span class="badge-work">진료일</span>'
 
       calendar_html += f"""
                 <td class="cal-td {cell_class}">
