@@ -178,4 +178,4 @@ for week in cal:
 calendar_html += "</table>"
 
 # 💡 높이를 450에서 520으로 늘려 6주 차 마지막 줄까지 잘림 없이 표시되도록 수정
-components.html(calendar_html, height=520, scrolling=False)
+components.html(calendar_html, height=600, scrolling=False)
