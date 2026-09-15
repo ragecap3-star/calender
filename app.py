@@ -111,7 +111,7 @@ if not holiday_df.empty and "Date" in holiday_df.columns:
 kr_holidays = holidays.KR(years=st.session_state.current_year)
 
 # 3) [예외 처리] 목요일이나 일요일이지만 '강제로 정상 진료'를 해야 하는 날짜가 있다면 여기에 추가 (YYYY-MM-DD)
-force_work_dates = ["2026-10-05"]
+force_work_dates = ["2026-10-05", "2026-12-10"]
 
 # 달력 시작을 일요일(SUNDAY)로 설정
 calendar.setfirstweekday(calendar.SUNDAY)
