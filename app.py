@@ -2,6 +2,7 @@ import calendar
 from datetime import datetime
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components  # 👈 컴포넌트 라이브러리 추가
 
 # 페이지 설정
 st.set_page_config(
@@ -168,5 +169,5 @@ for week in cal:
 
 calendar_html += "</table>"
 
-# ⚠️ HTML이 코드가 아니라 표로 깔끔하게 렌더링되도록 출력
-st.markdown(calendar_html, unsafe_allow_html=True)
+# 💡 st.markdown 대신 안전한 HTML 컴포넌트 렌더러 사용하여 코드가 아니라 표로 출력되도록 수정
+components.html(calendar_html, height=450, scrolling=False)
