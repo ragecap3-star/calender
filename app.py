@@ -112,12 +112,12 @@ cal = calendar.monthcalendar(
 )
 weekdays_name = ["월", "화", "수", "목", "금", "토", "일"]
 
-# HTML/CSS로 깔끔한 달력 표 만들기
+# HTML/CSS 스타일 및 테이블 헤더 생성
 calendar_html = """
 <style>
-.cal-table { width: 100%; border-collapse: collapse; text-align: center; font-family: sans-serif; }
-.cal-th { background-color: #f8f9fa; padding: 12px; border: 1px solid #e9ecef; font-weight: bold; color: #333; }
-.cal-td { height: 85px; vertical-align: top; border: 1px solid #e9ecef; padding: 6px; width: 14.28%; }
+.cal-table { width: 100%; border-collapse: collapse; text-align: center; font-family: sans-serif; table-layout: fixed; }
+.cal-th { background-color: #f8f9fa; padding: 10px; border: 1px solid #e9ecef; font-weight: bold; color: #333; }
+.cal-td { height: 85px; vertical-align: top; border: 1px solid #e9ecef; padding: 6px; }
 .day-num { font-weight: bold; font-size: 15px; margin-bottom: 6px; color: #212529; }
 .holiday-bg { background-color: #fff5f5; }
 .weekend-bg { background-color: #f8f9fa; }
@@ -133,6 +133,7 @@ for name in weekdays_name:
   calendar_html += f'<th class="cal-th">{name}</th>'
 calendar_html += "</tr>"
 
+# 날짜 데이터 채우기
 for week in cal:
   calendar_html += "<tr>"
   for i, day in enumerate(week):
@@ -144,9 +145,9 @@ for week in cal:
       current_date_str = f"{st.session_state.current_year}-{st.session_state.current_month:02d}-{day:02d}"
 
       is_holiday = current_date_str in holiday_dates
-      is_weekend = i >= 5  # 토(5), 일(6) 주말 진료 여부에 따라 조정 가능
+      is_weekend = i >= 5  # 토(5), 일(6)
 
-      # 상태 판별 및 디자인 적용 (진료일 / 휴진일)
+      # 상태 판별 및 디자인 적용
       if is_holiday:
         cell_class = "holiday-bg"
         badge = '<span class="badge-off">휴진일</span>'
@@ -158,13 +159,14 @@ for week in cal:
         badge = '<span class="badge-work">진료일</span>'
 
       calendar_html += f"""
-                <td class="cal-td {cell_class}">
-                    <div class="day-num">{day}</div>
-                    {badge}
-                </td>
-                """
+            <td class="cal-td {cell_class}">
+                <div class="day-num">{day}</div>
+                {badge}
+            </td>
+            """
   calendar_html += "</tr>"
 
 calendar_html += "</table>"
 
+# ⚠️ HTML이 코드가 아니라 표로 깔끔하게 렌더링되도록 출력
 st.markdown(calendar_html, unsafe_allow_html=True)
