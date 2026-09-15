@@ -2,7 +2,7 @@ import calendar
 from datetime import datetime
 import pandas as pd
 import streamlit as st
-import streamlit.components.v1 as components  # 👈 컴포넌트 라이브러리 추가
+import streamlit.components.v1 as components
 
 # 페이지 설정
 st.set_page_config(
@@ -108,10 +108,14 @@ holiday_dates = []
 if not holiday_df.empty and "Date" in holiday_df.columns:
   holiday_dates = holiday_df["Date"].astype(str).tolist()
 
+# 💡 1. 달력 시작을 일요일(SUNDAY)로 설정
+calendar.setfirstweekday(calendar.SUNDAY)
 cal = calendar.monthcalendar(
     st.session_state.current_year, st.session_state.current_month
 )
-weekdays_name = ["월", "화", "수", "목", "금", "토", "일"]
+
+# 💡 2. 요일 이름을 일요일부터 시작하도록 변경
+weekdays_name = ["일", "월", "화", "수", "목", "금", "토"]
 
 # HTML/CSS 스타일 및 테이블 헤더 생성
 calendar_html = """
@@ -131,6 +135,7 @@ calendar_html = """
 """
 
 for name in weekdays_name:
+  # 일요일(첫 번째) 글자색을 빨갛게 강조하고 싶다면 스타일 추가 가능
   calendar_html += f'<th class="cal-th">{name}</th>'
 calendar_html += "</tr>"
 
@@ -146,13 +151,21 @@ for week in cal:
       current_date_str = f"{st.session_state.current_year}-{st.session_state.current_month:02d}-{day:02d}"
 
       is_holiday = current_date_str in holiday_dates
-      is_weekend = i >= 5  # 토(5), 일(6)
 
-      # 상태 판별 및 디자인 적용
+      # 💡 3. 일요일 시작 기준 요일 인덱스 매핑
+      # 0: 일요일, 1: 월요일, 2: 화요일, 3: 수요일, 4: 목요일, 5: 금요일, 6: 토요일
+      is_sunday = i == 0
+      is_saturday = i == 6
+      is_thursday = i == 4  # 목요일 정기 휴진
+
+      # 상태 판별 및 디자인 적용 (우선순위: 수동 등록 휴진일 > 정기 목요일/주말 휴진 > 진료일)
       if is_holiday:
         cell_class = "holiday-bg"
         badge = '<span class="badge-off">휴진일</span>'
-      elif is_weekend:
+      elif is_thursday:
+        cell_class = "holiday-bg"
+        badge = '<span class="badge-off">정기휴진</span>'
+      elif is_sunday or is_saturday:
         cell_class = "weekend-bg"
         badge = '<span class="badge-off">주말휴진</span>'
       else:
@@ -169,5 +182,4 @@ for week in cal:
 
 calendar_html += "</table>"
 
-# 💡 st.markdown 대신 안전한 HTML 컴포넌트 렌더러 사용하여 코드가 아니라 표로 출력되도록 수정
 components.html(calendar_html, height=450, scrolling=False)
