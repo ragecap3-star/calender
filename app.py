@@ -58,7 +58,7 @@ if "popup_shown" not in st.session_state:
   st.session_state.popup_shown = True
   notice_popup()
 
-# 사이드바 공지 상시 노출 (안내 문구 제거됨)
+# 사이드바 공지 상시 노출
 with st.sidebar:
   st.header("📢 병원 소식")
   st.subheader(notice_title)
@@ -66,7 +66,7 @@ with st.sidebar:
 
 
 # --- 3. 월간 달력 네비게이션 (전달 / 다음달 이동) ---
-st.title("📅 E건강치과의원 월간 진료일 안내")
+st.title("📅 월간 진료일 안내")
 
 if "current_year" not in st.session_state:
   st.session_state.current_year = datetime.now().year
@@ -177,4 +177,5 @@ for week in cal:
 
 calendar_html += "</table>"
 
-components.html(calendar_html, height=450, scrolling=False)
+# 💡 높이를 450에서 520으로 늘려 6주 차 마지막 줄까지 잘림 없이 표시되도록 수정
+components.html(calendar_html, height=520, scrolling=False)
