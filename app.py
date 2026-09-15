@@ -63,7 +63,10 @@ with st.sidebar:
   st.subheader(notice_title)
   st.write(notice_content)
   st.divider()
-  st.info("💡 구글 스프레드시트만 수정하면 웹사이트 내용이 바로 바뀝니다!")
+  st.info(
+      "💡 구글 스프레드시트(Holiday 시트)에 임시 휴진일을 입력하세요! (토요일"
+      " 진료 가능)"
+  )
 
 
 # --- 3. 월간 달력 네비게이션 (전달 / 다음달 이동) ---
@@ -108,13 +111,11 @@ holiday_dates = []
 if not holiday_df.empty and "Date" in holiday_df.columns:
   holiday_dates = holiday_df["Date"].astype(str).tolist()
 
-# 💡 1. 달력 시작을 일요일(SUNDAY)로 설정
+# 달력 시작을 일요일(SUNDAY)로 설정
 calendar.setfirstweekday(calendar.SUNDAY)
 cal = calendar.monthcalendar(
     st.session_state.current_year, st.session_state.current_month
 )
-
-# 💡 2. 요일 이름을 일요일부터 시작하도록 변경
 weekdays_name = ["일", "월", "화", "수", "목", "금", "토"]
 
 # HTML/CSS 스타일 및 테이블 헤더 생성
@@ -135,7 +136,6 @@ calendar_html = """
 """
 
 for name in weekdays_name:
-  # 일요일(첫 번째) 글자색을 빨갛게 강조하고 싶다면 스타일 추가 가능
   calendar_html += f'<th class="cal-th">{name}</th>'
 calendar_html += "</tr>"
 
@@ -150,22 +150,17 @@ for week in cal:
     else:
       current_date_str = f"{st.session_state.current_year}-{st.session_state.current_month:02d}-{day:02d}"
 
-      is_holiday = current_date_str in holiday_dates
+      is_holiday = current_date_str in holiday_dates  # 구글 시트에 등록된 휴진일
+      is_sunday = i == 0  # 💡 일요일만 체크 (토요일은 제외됨)
 
-      # 💡 3. 일요일 시작 기준 요일 인덱스 매핑
-      # 0: 일요일, 1: 월요일, 2: 화요일, 3: 수요일, 4: 목요일, 5: 금요일, 6: 토요일
-      is_sunday = i == 0
-      is_saturday = i == 6
-      is_thursday = i == 4  # 목요일 정기 휴진
-
-      # 상태 판별 및 디자인 적용 (우선순위: 수동 등록 휴진일 > 정기 목요일/주말 휴진 > 진료일)
+      # 💡 상태 판별 로직
+      # 1. 구글 시트에 등록된 휴진일이라면 -> 휴진일
+      # 2. 일요일이라면 -> 주말휴진 (토요일은 제외되어 평일과 같이 진료일로 처리됨)
+      # 3. 그 외 날짜(월~토)라면 -> 진료일
       if is_holiday:
         cell_class = "holiday-bg"
         badge = '<span class="badge-off">휴진일</span>'
-      elif is_thursday:
-        cell_class = "holiday-bg"
-        badge = '<span class="badge-off">정기휴진</span>'
-      elif is_sunday or is_saturday:
+      elif is_sunday:
         cell_class = "weekend-bg"
         badge = '<span class="badge-off">주말휴진</span>'
       else:
