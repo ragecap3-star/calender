@@ -1,5 +1,6 @@
-import calendar
+calendar
 from datetime import datetime
+import holidays  # 💡 대한민국 공휴일 라이브러리 추가
 import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
@@ -64,8 +65,8 @@ with st.sidebar:
   st.write(notice_content)
   st.divider()
   st.info(
-      "💡 구글 스프레드시트(Holiday 시트)에 임시 휴진일을 입력하세요! (토요일"
-      " 진료 가능)"
+      "💡 대한민국 법정 공휴일은 자동 반영되며, 추가 휴진일은 구글"
+      " 시트(Holiday)에 입력하세요!"
   )
 
 
@@ -106,10 +107,13 @@ with col3:
 st.write("")
 
 # --- 4. 달력 렌더링 및 진료일/휴진일 판별 ---
-# 휴진일 데이터 리스트화 (YYYY-MM-DD)
+# 1) 구글 시트 등록 휴진일 리스트화
 holiday_dates = []
 if not holiday_df.empty and "Date" in holiday_df.columns:
   holiday_dates = holiday_df["Date"].astype(str).tolist()
+
+# 2) 💡 대한민국 공휴일 자동 생성 (현재 조회 중인 연도 기준)
+kr_holidays = holidays.KR(years=st.session_state.current_year)
 
 # 달력 시작을 일요일(SUNDAY)로 설정
 calendar.setfirstweekday(calendar.SUNDAY)
@@ -148,16 +152,20 @@ for week in cal:
           '<td class="cal-td" style="background-color: #fdfdfd;"></td>'
       )
     else:
-      current_date_str = f"{st.session_state.current_year}-{st.session_state.current_month:02d}-{day:02d}"
+      current_date = datetime(
+          st.session_state.current_year, st.session_state.current_month, day
+      )
+      current_date_str = current_date.strftime("%Y-%m-%d")
 
-      is_holiday = current_date_str in holiday_dates  # 구글 시트에 등록된 휴진일
-      is_sunday = i == 0  # 💡 일요일만 체크 (토요일은 제외됨)
+      is_sheet_holiday = current_date_str in holiday_dates  # 구글 시트 휴진일
+      is_kr_holiday = current_date in kr_holidays  # 💡 대한민국 법정 공휴일 여부
+      is_sunday = i == 0  # 일요일
 
       # 💡 상태 판별 로직
-      # 1. 구글 시트에 등록된 휴진일이라면 -> 휴진일
-      # 2. 일요일이라면 -> 주말휴진 (토요일은 제외되어 평일과 같이 진료일로 처리됨)
+      # 1. 구글 시트에 등록된 휴진일 이거나 법정 공휴일이라면 -> 휴진일
+      # 2. 일요일이라면 -> 주말휴진
       # 3. 그 외 날짜(월~토)라면 -> 진료일
-      if is_holiday:
+      if is_sheet_holiday or is_kr_holiday:
         cell_class = "holiday-bg"
         badge = '<span class="badge-off">휴진일</span>'
       elif is_sunday:
