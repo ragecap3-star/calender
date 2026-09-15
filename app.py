@@ -12,8 +12,8 @@ st.set_page_config(
 @st.cache_data(ttl=60)  # 60초마다 캐시 갱신 (시트 수정사항 반영)
 def load_data():
   # ⚠️ 아래 링크를 본인의 구글 시트 '웹에 게시된 CSV 링크'로 각각 변경하세요!
-  notice_csv_url = "YOUR_NOTICE_CSV_LINK"
-  holiday_csv_url = "YOUR_HOLIDAY_CSV_LINK"
+  notice_csv_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vReihb92LxghRUxSMJinTTUXuPgrEz4MHly0_8IL-T_t_RNsEM7UPgtMAp_UZ7qwXolr1M8V0F7qN_-/pub?gid=0&single=true&output=csv"
+  holiday_csv_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vReihb92LxghRUxSMJinTTUXuPgrEz4MHly0_8IL-T_t_RNsEM7UPgtMAp_UZ7qwXolr1M8V0F7qN_-/pub?gid=1822084661&single=true&output=csv"
 
   try:
     notice_df = pd.read_csv(notice_csv_url)
