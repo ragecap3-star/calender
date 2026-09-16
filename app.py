@@ -57,7 +57,7 @@ if "popup_shown" not in st.session_state:
   st.session_state.popup_shown = True
   notice_popup()
 
-# --- 3. 사이드바 구성 (공지사항 상시 노출 + 진료시간 안내 추가) ---
+# --- 3. 사이드바 구성 (공지사항 상시 노출 + 진료시간 안내) ---
 with st.sidebar:
   st.header("📢 병원 소식")
   st.subheader(notice_title)
@@ -65,14 +65,14 @@ with st.sidebar:
 
   st.divider()  # 구분선
 
-  # 💡 사이드바 하단 진료시간 안내 섹션
+  # 💡 요청하신 상세 진료시간 안내 반영
   st.markdown("### ⏰ 진료시간 안내")
   st.markdown(
       """
-    - **월 · 화 · 금** : 09:30 ~ 18:00
-    - 수요일(야간진료) : 09:30 ~ 19:30
-    - **토요일** : 09:30 ~ 12:30
-    - **점심시간** : 12:30 ~ 13:30
+    - **월 · 화 · 금**: 09:30 ~ 18:00
+    - **수요일(야간진료)**: 09:30 ~ 19:30
+    - **토요일**: 09:30 ~ 12:30
+    - **점심시간**: 12:30 ~ 13:30
     - **목요일 · 일요일**: **정기휴진**
     """
   )
@@ -123,7 +123,7 @@ if not holiday_df.empty and "Date" in holiday_df.columns:
 # 2) 대한민국 공휴일 자동 생성 (현재 조회 중인 연도 기준)
 kr_holidays = holidays.KR(years=st.session_state.current_year)
 
-# 3) [예외 처리] 목요일이나 일요일이지만 '강제로 정상 진료'를 해야 하는 날짜가 있다면 여기에 추가 (YYYY-MM-DD)
+# 3) [예외 처리] 강제로 정상 진료를 해야 하는 날짜가 있다면 여기에 추가 (YYYY-MM-DD)
 force_work_dates = ["2026-10-05", "2026-12-10"]
 
 # 달력 시작을 일요일(SUNDAY)로 설정
@@ -172,7 +172,7 @@ for week in cal:
       is_kr_holiday = current_date in kr_holidays
       is_force_work = current_date_str in force_work_dates  # 강제 진료일 체크
       is_sunday = i == 0  # 일요일
-      is_thursday = i == 4  # 목요일 체크
+      is_thursday = i == 4  # 목요일
 
       # 상태 판별 로직 (강제 진료일 ➔ 구글시트/공휴일 ➔ 일요일/목요일 정기휴일 순서)
       if is_force_work:
@@ -195,6 +195,10 @@ for week in cal:
             </td>
             """
   calendar_html += "</tr>"
+
+calendar_html += "</table>"
+
+components.html(calendar_html, height=600, scrolling=False)
 
 calendar_html += "</table>"
 
