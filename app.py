@@ -199,7 +199,3 @@ for week in cal:
 calendar_html += "</table>"
 
 components.html(calendar_html, height=600, scrolling=False)
-
-calendar_html += "</table>"
-
-components.html(calendar_html, height=600, scrolling=False)
