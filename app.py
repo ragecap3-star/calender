@@ -13,7 +13,6 @@ st.set_page_config(
 # --- 1. 구글 스프레드시트 데이터 불러오기 (공개 CSV 링크 활용) ---
 @st.cache_data(ttl=60)  # 60초마다 캐시 갱신 (시트 수정사항 반영)
 def load_data():
-  # ⚠️ 아래 링크를 본인의 구글 시트 '웹에 게시된 CSV 링크'로 각각 변경하세요!
   notice_csv_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vReihb92LxghRUxSMJinTTUXuPgrEz4MHly0_8IL-T_t_RNsEM7UPgtMAp_UZ7qwXolr1M8V0F7qN_-/pub?gid=0&single=true&output=csv"
   holiday_csv_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vReihb92LxghRUxSMJinTTUXuPgrEz4MHly0_8IL-T_t_RNsEM7UPgtMAp_UZ7qwXolr1M8V0F7qN_-/pub?gid=1822084661&single=true&output=csv"
 
@@ -58,14 +57,28 @@ if "popup_shown" not in st.session_state:
   st.session_state.popup_shown = True
   notice_popup()
 
-# 사이드바 공지 상시 노출
+# --- 3. 사이드바 구성 (공지사항 상시 노출 + 진료시간 안내 추가) ---
 with st.sidebar:
   st.header("📢 병원 소식")
   st.subheader(notice_title)
   st.write(notice_content)
 
+  st.divider()  # 구분선
 
-# --- 3. 월간 달력 네비게이션 (전달 / 다음달 이동) ---
+  # 💡 사이드바 하단 진료시간 안내 섹션
+  st.markdown("### ⏰ 진료시간 안내")
+  st.markdown(
+      """
+    - **월 · 화 · 금**: 09:30 ~ 18:00
+    - **수요일(야간진료) **: 09:30 ~ 19:30
+    - **토요일**: 09:00 ~ 12:30
+    - **점심시간**: 12:30 ~ 13:30
+    - **목요일 · 일요일**: **정기휴진**
+    """
+  )
+
+
+# --- 4. 월간 달력 네비게이션 (전달 / 다음달 이동) ---
 st.title("📅 E건강치과의원 월간 진료일 안내")
 
 if "current_year" not in st.session_state:
@@ -101,7 +114,7 @@ with col3:
 
 st.write("")
 
-# --- 4. 달력 렌더링 및 진료일/휴진일 판별 ---
+# --- 5. 달력 렌더링 및 진료일/휴진일 판별 ---
 # 1) 구글 시트 등록 휴진일 리스트화
 holiday_dates = []
 if not holiday_df.empty and "Date" in holiday_df.columns:
@@ -159,16 +172,16 @@ for week in cal:
       is_kr_holiday = current_date in kr_holidays
       is_force_work = current_date_str in force_work_dates  # 강제 진료일 체크
       is_sunday = i == 0  # 일요일
-      is_thursday = i == 4  # 💡 목요일 체크 추가
+      is_thursday = i == 4  # 목요일 체크
 
-      # 💡 상태 판별 로직 (강제 진료일 ➔ 구글시트/공휴일 ➔ 일요일/목요일 정기휴일 순서)
+      # 상태 판별 로직 (강제 진료일 ➔ 구글시트/공휴일 ➔ 일요일/목요일 정기휴일 순서)
       if is_force_work:
         cell_class = "work-bg"
         badge = '<span class="badge-work">진료일</span>'
       elif is_sheet_holiday or is_kr_holiday:
         cell_class = "holiday-bg"
         badge = '<span class="badge-off">휴진일</span>'
-      elif is_sunday or is_thursday:  # 💡 일요일과 목요일 모두 정기 휴일로 지정
+      elif is_sunday or is_thursday:  # 일요일과 목요일 정기 휴일
         cell_class = "weekend-bg"
         badge = '<span class="badge-off">정기휴진</span>'
       else:
